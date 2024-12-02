@@ -1,24 +1,21 @@
 ﻿using Npgsql;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace responsi
 {
-    internal class KaryawanRepository : Karyawan
+    internal class KaryawanRepository : Karyawan, IKaryawanRepository
     {
         private const string conn = "Host=localhost;Username=postgres;Password=postgres;Database=postgres";
-        private static NpgsqlConnection connection;
-        private static NpgsqlCommand cmd;
-        private static DataTable dt;
+        private static NpgsqlConnection? connection;
+        private static NpgsqlCommand? cmd;
+        private static DataTable? dt;
 
         private DataGridView dgvData;
-        private DataGridViewRow row;
+        private DataGridViewRow? row;
 
-        public DataGridViewRow Row { set { row = value; } }
+        public DataGridViewRow? Row { set { row = value; } }
 
         public KaryawanRepository(DataGridView _dgvData)
         {
@@ -31,7 +28,7 @@ namespace responsi
         {
             try
             {
-                connection.Open();
+                connection?.Open();
                 dgvData.DataSource = null;
                 dt = new DataTable();
                 string sql = "SELECT * FROM karyawan_select()";
@@ -50,7 +47,7 @@ namespace responsi
             }
             finally
             {
-                connection.Close();
+                connection?.Close();
             }
         }
 
@@ -59,16 +56,16 @@ namespace responsi
         {
             try
             {
-                connection.Open();
+                connection?.Open();
                 string sql = @"SELECT * FROM karyawan_insert(:_nama, :_id_dep)";
                 cmd = new NpgsqlCommand(sql, connection);
                 cmd.Parameters.AddWithValue(":_nama", tbNamaKaryawan.Text);
                 cmd.Parameters.AddWithValue(":_id_dep", int.Parse(cbDepKaryawan.Text));
 
-                if ((int)cmd.ExecuteScalar() == 1)
+                if ((int?)cmd.ExecuteScalar() == 1)
                 {
                     MessageBox.Show("Data berhasil ditambahkan");
-                    connection.Close();
+                    connection?.Close();
                     tbNamaKaryawan.Text = null;
                     cbDepKaryawan.Text = null;
                 }
@@ -80,18 +77,17 @@ namespace responsi
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
-                connection.Close();
+                connection?.Close();
             }
             finally
             {
-                connection.Close();
+                connection?.Close();
             }
         }
 
         // EDIT
         public void Edit(TextBox tbNamaKaryawan, ComboBox cbDepKaryawan)
         {
-
             if (row == null)
             {
                 MessageBox.Show("Pilih data yang akan diubah");
@@ -100,17 +96,17 @@ namespace responsi
 
             try
             {
-                connection.Open();
+                connection?.Open();
                 string sql = @"SELECT * FROM karyawan_update(:_id, :_nama, :_id_dep)";
                 cmd = new NpgsqlCommand(sql, connection);
-                cmd.Parameters.AddWithValue("_id", row.Cells["_id_karyawan"].Value.ToString());
+                cmd.Parameters.AddWithValue("_id", row.Cells["_id_karyawan"].Value?.ToString() ?? string.Empty);
                 cmd.Parameters.AddWithValue("_nama", tbNamaKaryawan.Text);
                 cmd.Parameters.AddWithValue("_id_dep", int.Parse(cbDepKaryawan.Text));
 
-                if ((int)cmd.ExecuteScalar() == 1)
+                if ((int?)cmd.ExecuteScalar() == 1)
                 {
                     MessageBox.Show("Data berhasil diubah");
-                    connection.Close();
+                    connection?.Close();
                     tbNamaKaryawan.Text = null;
                     cbDepKaryawan.Text = null;
                     row = null;
@@ -120,21 +116,20 @@ namespace responsi
                     MessageBox.Show("Data gagal diubah");
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
-                connection.Close();
+                connection?.Close();
             }
             finally
             {
-                connection.Close();
+                connection?.Close();
             }
         }
 
         // DELETE
         public void Delete(TextBox tbNamaKaryawan, ComboBox cbDepKaryawan)
         {
-
             if (row == null)
             {
                 MessageBox.Show("Pilih data yang akan dihapus");
@@ -143,15 +138,15 @@ namespace responsi
 
             try
             {
-                connection.Open();
+                connection?.Open();
                 string sql = @"SELECT * FROM karyawan_delete(:_id)";
                 cmd = new NpgsqlCommand(sql, connection);
-                cmd.Parameters.AddWithValue("_id", row.Cells["_id_karyawan"].Value.ToString());
+                cmd.Parameters.AddWithValue("_id", row.Cells["_id_karyawan"].Value?.ToString() ?? string.Empty);
 
-                if ((int)cmd.ExecuteScalar() == 1)
+                if ((int?)cmd.ExecuteScalar() == 1)
                 {
                     MessageBox.Show("Data berhasil dihapus");
-                    connection.Close();
+                    connection?.Close();
                     tbNamaKaryawan.Text = null;
                     cbDepKaryawan.Text = null;
                     row = null;
@@ -164,11 +159,11 @@ namespace responsi
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
-                connection.Close();
+                connection?.Close();
             }
             finally
             {
-                connection.Close();
+                connection?.Close();
             }
         }
     }
